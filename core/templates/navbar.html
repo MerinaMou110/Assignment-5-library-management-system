@@ -1,0 +1,178 @@
+{% load static %}
+<nav class="flex items-center justify-between flex-wrap bg-white p-6 px-10">
+    <div class="flex items-center flex-shrink-0 text-white mr-6">
+        <a href="/">
+            <img src="{% static 'img/logo3.png'%}" alt="Logo" class="h-12 w-12">
+        </a>
+    </div>
+    <div class="block lg:hidden">
+      <button
+        class="flex items-center px-3 py-2 border rounded text-white border-white-400 hover:text-white hover:border-white"
+      >
+        <svg
+          class="fill-current h-3 w-3"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title>Menu</title>
+          <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+        </svg>
+      </button>
+    </div>
+    <!-- Register Login non logged in user er jonne -->
+    <!-- Report , Withdraw, Deposit       Profile Logout logged in user -->
+    <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto px-5">
+      {% if request.user.is_authenticated %}
+      <div class="text-md lg:flex-grow">
+        <a
+          href="{% url 'profile'%}"
+          class="block mt-4 lg:inline-block lg:mt-0 text-blue-900 hover:text-red-900 hover:font-black mr-4"
+        >
+          Report
+        </a>
+        <a
+          href="{% url 'deposit_money'  %}"
+          class="block mt-4 lg:inline-block lg:mt-0 text-blue-900 hover:text-red-900 hover:font-black mr-4"
+        >
+          Deposit
+        </a>
+        
+
+      </div>
+      <div class="flex w-auto">
+        <div class="text-blue-900 my-auto font-black px-5">
+          Welcome, {{ request.user.first_name }} (balance :
+          {{request.user.account.balance}})
+        </div>
+  
+        <a
+          href="{% url 'profile' %}"
+          class="mx-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-dark hover:bg-red-700 mt-4 lg:mt-0"
+          >Profile</a
+        >
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="mx-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-dark hover:bg-red-700 mt-4 lg:mt-0"
+          >
+            Logout
+          </button>
+        </form>
+      </div>
+      {% else %}
+      <div class="text-md lg:flex-grow"></div>
+      <div>
+        <a
+          href="{% url 'login' %}"
+          class="mr-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-red-700 mt-4 lg:mt-0"
+          >Login</a
+        >
+      </div>
+      <div>
+        <a
+          href="{% url 'register' %}"
+          class="inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0"
+          >Register</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </nav>
+{% comment %} <body style="background-color : #e4e4e4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{/}">Django Blog</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          ]
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% if request.user.is_authenticated %}
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="{}"
+                >Report</a
+              >
+            </li>
+            <li class="nav-item">
+                <a
+                  class="nav-link active"
+                  aria-current="page"
+                  href="{}"
+                  >Deposit</a
+                >
+              </li>
+              <div class="navbar-text">
+                Welcome, {{ request.user.first_name }} (balance: {{ request.user.account.balance }})
+            </div>
+            <li class="nav-item">
+                <a
+                  class="nav-link active"
+                  aria-current="page"
+                  href="{}"
+                  >Profile</a
+                >
+              </li>
+
+            {% else %}
+
+            {% if request.user.is_authenticated %}
+            <li class="nav-item mx-3">
+              <a
+                class="nav-link"
+                href="{ }"
+                >Profile</a
+              >
+            </li>
+            {% endif %}
+          </ul>
+          <div class="d-flex">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              {% if request.user.is_authenticated %}
+              <li class="nav-item mx-3">
+                <a
+                  class="nav-link btn btn-warning text-dark"
+                  href="{% url 'profile' %}"
+                  >Profile</a
+                >
+              </li>
+              <li class="nav-item mx-3">
+                <a
+                  class="nav-link btn btn-danger text-dark"
+                  href="{% url 'user_logout' %}"
+                  >Logout</a
+                >
+              </li>
+              {% else %}
+              <li class="nav-item mx-3">
+                <a
+                  class="nav-link btn btn-warning text-dark"
+                  href="{% url 'register' %}"
+                  >Register</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link btn btn-primary text-dark"
+                  href="{% url 'user_login' %}"
+                  >Login</a
+                >
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav> {% endcomment %}

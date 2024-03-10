@@ -1,0 +1,113 @@
+{% extends 'base.html' %} 
+ {% load static %}
+{% load humanize %} 
+{% block head_title %} Transaction Report{% endblock %} 
+{% block content %}
+
+
+<div class="my-10 py-3 px-4 bg-white rounded-xl shadow-md">
+    
+    <form action="{% url 'update_profile' %}" method="post">
+        {% csrf_token %}
+        <!-- Your form fields go here, e.g., current password, new password, etc. -->
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">Update Profile</button>
+    </form>
+
+  <h1 class="font-bold text-3xl text-center pb-5 pt-2">Borrowing History</h1>
+  <hr />
+  <form method="get" action="{% url 'profile'%}">
+    <div class="flex justify-center">
+      <div
+        class="mt-10 pl-3 pr-2 bg-white border rounded-md border-gray-500 flex justify-between items-center relative w-4/12 mx-2"
+      >
+        <label for="start_date">From:</label>
+        <input
+          class="appearance-none w-full outline-none focus:outline-none active:outline-none"
+          type="date"
+          id="start_date"
+          name="start_date"
+        />
+      </div>
+ 
+      <div
+        class="mt-10 pl-3 pr-2 bg-white border rounded-md border-gray-500 flex justify-between items-center relative w-4/12"
+      >
+        <label for="end_date">To:</label>
+        <input
+          class="appearance-none w-full outline-none focus:outline-none active:outline-none"
+          type="date"
+          id="end_date"
+          name="end_date"
+        />
+      </div>
+      <div class="mt-10 pl-3 pr-2 flex justify-between items-center relative w-4/12">
+        <button
+          class="bg-blue-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          type="submit"
+        >
+          Filter
+        </button>
+      </div>
+    </div>
+  </form>
+  <table class="table-auto mx-auto w-full px-5 rounded-xl mt-8 border dark:border-neutral-500">
+    <thead class="bg-purple-900 text-white text-left">
+        <tr class="bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-md py-2 px-4 text-white font-bold">
+            <th class="px-4 py-2">Date</th>
+            <th class="px-4 py-2">Transaction ID</th>
+            <th class="px-4 py-2">Book Title</th>
+            <th class="px-4 py-2">Price</th>
+            <th class="px-4 py-2">Balance After Transaction</th>
+            <th class="px-4 py-2">Return Book</th> <!-- New column for Return Book -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in borrowing_history %}
+            <tr class="border-b dark:border-neutral-500">
+                <td class="px-4 py-2">
+                    {{ transaction.timestamp|date:"F d, Y h:i A" }}
+                </td>
+                <td class="px-4 py-2">
+                    {{ transaction.id }}
+                </td>
+                <td class="px-4 py-2">
+                    {% if transaction.book %}
+                        {{ transaction.book.title }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td class="px-4 py-2">
+                    $ {{ transaction.amount|floatformat:2|intcomma }}
+                </td>
+                <td class="px-4 py-2">
+                    $ {{ transaction.balance_after_transaction|floatformat:2|intcomma }}
+                </td>
+                <td class="px-4 py-2">
+                    {% if  not transaction.paid %}
+                    <form method="post" action="{% url 'return_book' transaction.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="transaction_id" value="{{ transaction.id }}">
+                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Borrow
+                        </button>
+                    </form>
+                    {% else %}
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Return
+                    </button>
+              {% endif %}  
+                </td>
+            </tr>
+        {% endfor %}
+        <tr class="bg-gray-800 text-white">
+            <th class="px-4 py-2 text-right" colspan="3">Current Balance</th>
+            <th class="px-4 py-2 text-left">
+                $ {{ account.balance|floatformat:2|intcomma }}
+            </th>
+            <th class="px-4 py-2"></th> <!-- Empty cell for alignment -->
+        </tr>
+    </tbody>
+</table>
+</div> 
+{% endblock %}
