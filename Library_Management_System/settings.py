@@ -33,7 +33,7 @@ SECRET_KEY = "django-insecure-@tqa_snvv75t7!b60u=!oknrd#rd@*s6oq6u-vn3u2hwn=dr_z
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-# CSRF_TRUSTED_ORIGINS = ['https://mamar-bank-project-132w.onrender.com','https://*.127.0.0.1'] # first part will be your deploy project’s domain name
+CSRF_TRUSTED_ORIGINS = ['https://library-management-system-fqv4.onrender.com','https://*.127.0.0.1'] # first part will be your deploy project’s domain name
 
 
 # Application definition
