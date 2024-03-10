@@ -47,26 +47,38 @@ class DetailBookView(DetailView):
     model = models.Book
     pk_url_kwarg = 'id'
     template_name = 'library_details.html'
-
+     
+    
     def post(self, request, *args, **kwargs):
         print("Post method is being executed.")
         comment_form = forms.CommentForm(data=self.request.POST)
         book = self.get_object()
         print(f"Book ID: {book.id}, Borrowed: {book.borrow_book}")
         # Check if the user has borrowed the book
+        # Check if the user has borrowed the book
         if book.borrow_book:
-            
-        
-            if comment_form.is_valid():
-                print("Comment form is valid.")
-                new_comment = comment_form.save(commit=False)
-                new_comment.book = book
-                new_comment.save()
-                print("Comment saved successfully.")
+            # Additional check: Ensure the current user has borrowed the book
+            user_has_borrowed = Transaction.objects.filter(
+                account=request.user.account,
+                book=book,
+                paid=False
+            ).exists()
+
+            if user_has_borrowed:
+                if comment_form.is_valid():
+                    print("Comment form is valid.")
+                    new_comment = comment_form.save(commit=False)
+                    new_comment.book = book
+                    new_comment.save()
+                    print("Comment saved successfully.")
+                else:
+                    print("Comment form is NOT valid.")
+                    print(comment_form.errors)
+                return self.get(request, *args, **kwargs)
             else:
-                print("Comment form is NOT valid.")
-                print(comment_form.errors)
-            return self.get(request, *args, **kwargs)
+                print("User has not borrowed the book.")
+                messages.error(request, 'You can only review books that you have borrowed.')
+                return redirect('detail_book', id=book.id)
         else:
             print("Transaction does not exist.")
             messages.error(request, 'You can only review books that you have borrowed.')
@@ -208,7 +220,8 @@ class TransactionReportView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         # jodi user kono type filter nh kore taile tar total transition report dekhabo
         queryset = super().get_queryset().filter(
-            account=self.request.user.account
+            account=self.request.user.account,
+            transaction_type=BOOK_RETURN
         )
         
         start_date_str = self.request.GET.get('start_date')
@@ -222,6 +235,8 @@ class TransactionReportView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(timestamp__date__gte=start_date, timestamp__date__lte=end_date)
 
             self.balance = Transaction.objects.filter(
+                account=self.request.user.account,
+                transaction_type=BOOK_RETURN,
                 timestamp__date__gte=start_date, timestamp__date__lte=end_date
             ).aggregate(Sum('amount'))['amount__sum']
         else:
@@ -233,7 +248,7 @@ class TransactionReportView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context.update({
             'account': self.request.user.account,
-            'borrowing_history': context['object_list'],  # Rename 'transactions' to 'borrowing_history'
+            'borrowing_history': context['object_list'],  
 
         })
 
