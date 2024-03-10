@@ -54,17 +54,21 @@ class DetailBookView(DetailView):
         comment_form = forms.CommentForm(data=self.request.POST)
         book = self.get_object()
         print(f"Book ID: {book.id}, Borrowed: {book.borrow_book}")
+       
         # Check if the user has borrowed the book
-        # Check if the user has borrowed the book
-        if book.borrow_book:
-            # Additional check: Ensure the current user has borrowed the book
-            user_has_borrowed = Transaction.objects.filter(
-                account=request.user.account,
-                book=book,
-                paid=False
-            ).exists()
+        if not self.request.user.is_authenticated:
+            messages.error(request, 'You must be logged in to review books.')
+            return redirect('login')  # Redirect to the login page or any other page you prefer
 
-            if user_has_borrowed:
+        
+            # Additional check: Ensure the current user has borrowed the book
+        user_has_borrowed = Transaction.objects.filter(
+            account=request.user.account,
+            book=book,
+            paid=False
+        ).exists()
+
+        if user_has_borrowed:
                 if comment_form.is_valid():
                     print("Comment form is valid.")
                     new_comment = comment_form.save(commit=False)
@@ -75,15 +79,11 @@ class DetailBookView(DetailView):
                     print("Comment form is NOT valid.")
                     print(comment_form.errors)
                 return self.get(request, *args, **kwargs)
-            else:
+        else:
                 print("User has not borrowed the book.")
                 messages.error(request, 'You can only review books that you have borrowed.')
                 return redirect('detail_book', id=book.id)
-        else:
-            print("Transaction does not exist.")
-            messages.error(request, 'You can only review books that you have borrowed.')
-            return redirect('detail_book', id=book.id)
-        
+       
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         book= self.object # post model er object ekhane store korlam
